@@ -28,6 +28,7 @@
 			import flash.Boot;
 			import flash.display.Screen;
 			import flash.events.DataEvent;
+			import flash.events.Event;
 			import flash.events.MouseEvent;
 			
 			import haxe.org.dassista.api.rest.as3.RestService;
@@ -55,7 +56,7 @@
 				
 				this.pdmlStack = new ArrayCollection();
 			}
-		
+
 			private function onMouseDown(event:MouseEvent):void
 			{
 				if(event.type == MouseEvent.RIGHT_MOUSE_DOWN)
@@ -84,7 +85,6 @@
 					getClassPath.setValue("target", draggedFile.nativePath);
 					getClassPath.load(onGetClassPathResult);
 					cursorManager.setBusyCursor();
-					//this.pdmlStack.addItem(new PdmlFile(draggedFile.nativePath));
 				}
 			}
 			
