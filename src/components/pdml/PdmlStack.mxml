@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:DataGroup xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		xmlns:s="library://ns.adobe.com/flex/spark" 
+		xmlns:mx="library://ns.adobe.com/flex/halo"
+		itemRenderer="{new ClassFactory(PdmlRenderer)}"
+		rendererAdd="onRendererAdd(event)"
+		rendererRemove="onRendererRemove(event)"
+		minHeight="100">
+		<s:layout>
+				<s:VerticalLayout gap="1" />
+		</s:layout>		
+		<fx:Script>
+			<![CDATA[
+				import flash.events.MouseEvent;
+				
+				import spark.components.supportClasses.ItemRenderer;
+				import spark.events.RendererExistenceEvent;
+				
+				private var currentSelectedRenderer:ItemRenderer;
+				
+				private function onRendererAdd(event:RendererExistenceEvent):void
+				{
+					(event.renderer as ItemRenderer).addEventListener(MouseEvent.CLICK, onRendererClick);
+				}
+				
+				private function onRendererRemove(event:RendererExistenceEvent):void
+				{
+					(event.renderer as ItemRenderer).removeEventListener(MouseEvent.CLICK, onRendererClick);
+				}
+				
+				private function onRendererClick(e:MouseEvent):void
+				{
+					if(this.currentSelectedRenderer != null)
+						this.currentSelectedRenderer.selected = false;
+					this.currentSelectedRenderer = e.target as ItemRenderer; 
+					this.currentSelectedRenderer.selected = true;
+				}
+			]]>
+		</fx:Script>
+	
+</s:DataGroup>
