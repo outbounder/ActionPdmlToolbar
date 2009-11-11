@@ -31,12 +31,6 @@ in accordance with the terms of the license agreement accompanying it.
 		<s:State name="disabledInactive" stateGroups="disabledGroup, inactiveGroup" />
 	</s:states>
 	
-	<s:Rect id="backgroundRect">
-		<s:fill>
-			<s:SolidColor id="bgFill" color="white" />
-		</s:fill>
-	</s:Rect>
-	
 	<s:Group id="contentGroup" width="100%" height="100%" minHeight="0" minWidth="0"/>
 	
 </s:SparkSkin>

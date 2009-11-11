@@ -1,20 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<s:DataGroup xmlns:fx="http://ns.adobe.com/mxml/2009" 
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
 		xmlns:s="library://ns.adobe.com/flex/spark" 
-		xmlns:mx="library://ns.adobe.com/flex/halo"
-		itemRenderer="{new ClassFactory(PdmlRenderer)}"
-		rendererAdd="onRendererAdd(event)"
-		rendererRemove="onRendererRemove(event)"
-		minHeight="100">
-		<s:layout>
-				<s:VerticalLayout gap="1" />
-		</s:layout>		
+		xmlns:mx="library://ns.adobe.com/flex/halo">
+	
 		<fx:Script>
 			<![CDATA[
 				import flash.events.MouseEvent;
 				
+				import mx.collections.ArrayCollection;
+				
 				import spark.components.supportClasses.ItemRenderer;
 				import spark.events.RendererExistenceEvent;
+				
+				[Bindable]
+				public var dataProvider:ArrayCollection;
 				
 				private var currentSelectedRenderer:ItemRenderer;
 				
@@ -38,4 +37,22 @@
 			]]>
 		</fx:Script>
 	
-</s:DataGroup>
+	<s:Rect width="100%" height="100%">
+		<s:fill>
+			<s:SolidColor color="white" />
+		</s:fill>
+		<s:stroke>
+			<s:SolidColorStroke color="black" />
+		</s:stroke>
+	</s:Rect>
+	
+	<s:DataGroup id="pdmlStackList" dataProvider="{this.dataProvider}"
+				 itemRenderer="{new ClassFactory(PdmlRenderer)}"
+				 rendererAdd="onRendererAdd(event)"
+				 rendererRemove="onRendererRemove(event)">
+		<s:layout>
+			<s:VerticalLayout gap="1" />
+		</s:layout>		
+	</s:DataGroup>
+	
+</s:Group>

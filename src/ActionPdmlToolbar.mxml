@@ -3,12 +3,12 @@
 					   xmlns:s="library://ns.adobe.com/flex/spark" 
 					   xmlns:mx="library://ns.adobe.com/flex/halo"
 					   xmlns:pdml="components.pdml.*"
-					   minWidth="300"
-					   minHeight="500"
 					   width="100%"
 					   height="100%"
+					   currentState="normal"
 					   preinitialize="onPreinitialize()"
 					   creationComplete="onCreationComplete()"
+					   applicationComplete="onAppComplete()"
 					   mouseDown="onMouseDown(event)" >
 	
 	<fx:Style>
@@ -26,10 +26,9 @@
 			import data.model.PdmlFile;
 			
 			import flash.Boot;
-			import flash.display.Screen;
 			import flash.events.DataEvent;
-			import flash.events.Event;
-			import flash.events.MouseEvent;
+			import flash.events.InvokeEvent;
+			import flash.events.KeyboardEvent;
 			
 			import haxe.org.dassista.api.rest.as3.RestService;
 			
@@ -39,6 +38,8 @@
 			
 			[Bindable]
 			private var pdmlStack:ArrayCollection;
+			[Bindable]
+			private var currentPdml:PdmlFile;
 			
 			private function onPreinitialize():void
 			{
@@ -48,13 +49,67 @@
 			private function onCreationComplete():void
 			{
 				this.alwaysInFront = true;
-				this.nativeWindow.x = Screen.mainScreen.visibleBounds.width-this.nativeWindow.width;
-				this.nativeWindow.y = (Screen.mainScreen.visibleBounds.height-this.nativeWindow.height)/2;
+				this.dockWindowRight();
 				
 				this.addEventListener(NativeDragEvent.NATIVE_DRAG_ENTER, onNativeDragEnter);
 				this.addEventListener(NativeDragEvent.NATIVE_DRAG_DROP, onNativeDragDrop);
 				
 				this.pdmlStack = new ArrayCollection();
+			}
+			
+			private function onAppComplete():void
+			{
+				this.stage.addEventListener(KeyboardEvent.KEY_DOWN, onKeyDown, true);
+				
+				var stackList:RestService = new RestService();
+				stackList.setValue("module", "haxe.org.dassista.tools.RepoInfo");
+				stackList.setValue("method", "getPdmlStackList");
+				stackList.load(onStackListResult);
+				cursorManager.setBusyCursor();
+			}
+			
+			private function onStackListResult(e:DataEvent):void
+			{
+				cursorManager.removeBusyCursor();
+				
+				if(e.data.indexOf("ioerror") != -1)
+				{
+					Alert.show(e.data);
+					return;
+				}
+				var dataXML:XML = XML("<result>"+e.data+"</result>");
+				for each(var output:XML in dataXML.output)
+					this.pdmlStack.addItem(new PdmlFile(output.text()));
+				
+				this.addEventListener(InvokeEvent.INVOKE, onInvoke);
+			}
+			
+			private function onInvoke(e:InvokeEvent):void
+			{
+				if(e.arguments.length == 0)
+					return;
+				
+				if(e.arguments.length == 1)
+				{
+					var arg:String = e.arguments[0] as String;
+					if(arg.indexOf(".pdml") != -1)
+					{
+						// invoke to execute ;)
+						this.addPdmlFile(arg);
+					}
+					else if(arg == "hide")
+					{
+						this.hide();						
+					}
+					else
+						this.show();
+				}
+			}
+			
+			private function onKeyDown(e:KeyboardEvent):void
+			{
+				if(e.keyCode == Keyboard.ESCAPE)
+					this.hide();
 			}
 
 			private function onMouseDown(event:MouseEvent):void
@@ -79,45 +134,69 @@
 				{
 					var fileList:Array = e.clipboard.getData('air:file list') as Array;
 					var draggedFile:File = fileList[0] as File;
-					var getClassPath:RestService = new RestService();
-					getClassPath.setValue("module", "haxe.org.dassista.tools.RepoInfo");
-					getClassPath.setValue("method", "getClassPath");
-					getClassPath.setValue("target", draggedFile.nativePath);
-					getClassPath.load(onGetClassPathResult);
-					cursorManager.setBusyCursor();
+					this.addPdmlFile(draggedFile.nativePath);
 				}
+			}
+			
+			private function addPdmlFile(filePath:String):void
+			{
+				var getClassPath:RestService = new RestService();
+				getClassPath.setValue("module", "haxe.org.dassista.tools.RepoInfo");
+				getClassPath.setValue("method", "stackPdmlFile");
+				getClassPath.setValue("target", filePath);
+				getClassPath.load(onGetClassPathResult);
+				cursorManager.setBusyCursor();
 			}
 			
 			private function onGetClassPathResult(e:DataEvent):void
 			{
 				cursorManager.removeBusyCursor();
 				
-				var dataXML:XML = XML(e.data);
-				if(dataXML.name()=="ioerror")
+				if(e.data.indexOf("ioerror") != -1)
 				{
 					Alert.show(e.data);
 					return;
 				}
+				var dataXML:XML = XML(e.data);
 				
 				this.pdmlStack.addItem(new PdmlFile(dataXML.text()));
 			}
 			
+			private function hide():void
+			{
+				this.currentState = "hidden";
+				this.nativeWindow.width = 20;
+				this.dockWindowRight();
+			}
+			
+			private function show():void
+			{
+				this.currentState = "normal";
+				this.nativeWindow.width = 300;
+				this.dockWindowRight();
+			}
+
+			private function dockWindowRight():void
+			{
+				this.nativeWindow.x = Screen.mainScreen.visibleBounds.width-this.nativeWindow.width;
+				this.nativeWindow.y = (Screen.mainScreen.visibleBounds.height-this.nativeWindow.height)/2;
+			}
+
 		]]>
 	</fx:Script>
 	
-	<s:VGroup width="100%" height="100%" >
-		<s:Button label="->" width="100%" />
-		<mx:VDividedBox width="100%" height="100%">
-			<pdml:PdmlStack width="100%" dataProvider="{this.pdmlStack}"/>
-			<s:List width="100%" height="100%">
-				<s:dataProvider>
-					<s:ArrayList>
-						<fx:String>php.restService</fx:String>
-						<fx:String>org.rtdc</fx:String>
-					</s:ArrayList>
-				</s:dataProvider>
-			</s:List>
-		</mx:VDividedBox>
+	<s:states>
+		<s:State name="normal" />
+		<s:State name="hidden" />
+	</s:states>
+	
+	<s:Group width="20" height="100%" right="0" includeIn="hidden">
+		<s:Button id="showBtn" label="->" width="100%" height="100%" click="{this.show();}" />
+	</s:Group>
+	
+	<s:VGroup width="100%" height="100%" includeIn="normal">
+		<s:Button id="hideBtn" label="->" width="100%" click="{this.hide()}" />
+		<pdml:PdmlStack width="100%" dataProvider="{this.pdmlStack}" height="100%"/>	
 	</s:VGroup>
 	
 </s:WindowedApplication>

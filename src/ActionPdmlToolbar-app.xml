@@ -37,7 +37,7 @@
 	<initialWindow>
 		<!-- The main SWF or HTML file of the application. Required. -->
 		<!-- Note: In Flash Builder, the SWF reference is set automatically. -->
-		<content>[This value will be overwritten by Flash Builder in the output app.xml]</content>
+		<content>ActionPdmlToolbar.swf</content>
 		
 		<!-- The title of the main window. Optional. -->
 		<!-- <title></title> -->
@@ -46,7 +46,7 @@
 		<systemChrome>none</systemChrome>
 
 		<!-- Whether the window is transparent. Only applicable when systemChrome is none. Optional. Default false. -->
-		<transparent>false</transparent>
+		<transparent>true</transparent>
 
 		<!-- Whether the window is initially visible. Optional. Default false. -->
 		<!-- <visible></visible> -->
@@ -61,10 +61,10 @@
 		<!-- <resizable></resizable> -->
 
 		<!-- The window's initial width. Optional. -->
-		<!-- <width></width> -->
+		<width>300</width>
 
 		<!-- The window's initial height. Optional. -->
-		<!-- <height></height> -->
+		<height>500</height>
 
 		<!-- The window's initial x position. Optional. -->
 		<!-- <x></x> -->
