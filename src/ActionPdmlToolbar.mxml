@@ -97,9 +97,12 @@
 						// invoke to execute ;)
 						this.addPdmlFile(arg);
 					}
-					else if(arg == "hide")
+					else if(arg == "showhide")
 					{
-						this.hide();						
+						if(this.currentState == "normal")
+							this.hide();
+						else
+							this.show();
 					}
 					else
 						this.show();

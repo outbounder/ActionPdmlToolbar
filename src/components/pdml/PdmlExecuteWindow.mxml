@@ -55,6 +55,6 @@
 		]]>
 	</fx:Script>
 	
-	<s:RichText id="outputText" width="100%" height="100%" />
+	<s:RichEditableText id="outputText" width="100%" height="100%" editable="false"/>
 	
 </s:Window>
