@@ -5,11 +5,11 @@
 					   xmlns:pdml="components.pdml.*"
 					   width="100%"
 					   height="100%"
-					   currentState="normal"
+					   currentState="loading"
 					   preinitialize="onPreinitialize()"
 					   creationComplete="onCreationComplete()"
 					   applicationComplete="onAppComplete()"
-					   mouseDown="onMouseDown(event)" >
+					   mouseDown="onMouseDown(event)" xmlns:components="components.*" xmlns:modules="components.modules.*">
 	
 	<fx:Style>
 		
@@ -23,12 +23,14 @@
 	
 	<fx:Script>
 		<![CDATA[
+			import data.model.MultiModuleInfo;
 			import data.model.PdmlFile;
 			
 			import flash.Boot;
 			import flash.events.DataEvent;
 			import flash.events.InvokeEvent;
 			import flash.events.KeyboardEvent;
+			import flash.events.MouseEvent;
 			
 			import haxe.org.dassista.api.rest.as3.RestService;
 			
@@ -39,7 +41,12 @@
 			[Bindable]
 			private var pdmlStack:ArrayCollection;
 			[Bindable]
+			private var modulesList:ArrayCollection;
+			[Bindable]
 			private var currentPdml:PdmlFile;
+			
+			private var oldWidth:int;
+			private var oldHeight:int;
 			
 			private function onPreinitialize():void
 			{
@@ -49,7 +56,7 @@
 			private function onCreationComplete():void
 			{
 				this.alwaysInFront = true;
-				this.dockWindowRight();
+				this.snapToEdge();
 				
 				this.addEventListener(NativeDragEvent.NATIVE_DRAG_ENTER, onNativeDragEnter);
 				this.addEventListener(NativeDragEvent.NATIVE_DRAG_DROP, onNativeDragDrop);
@@ -81,6 +88,23 @@
 				for each(var output:XML in dataXML.output)
 					this.pdmlStack.addItem(new PdmlFile(output.text()));
 				
+				// module info
+				var moduleInfoContext:RestService = new RestService();
+				moduleInfoContext.setValue("module", "haxe.org.dassista.tools.ModuleInfo");
+				moduleInfoContext.setValue("target", "haxe.org.dassista.tools");
+				
+				moduleInfoContext.load(onModuleInfoResult);
+			}
+			
+			private function onModuleInfoResult(e:DataEvent):void
+			{
+				this.modulesList = new ArrayCollection();
+				
+				var result:XML = XML("<result>"+e.data+"</result>");
+				for each(var node:XML in result.children())
+				this.modulesList.addItem(new MultiModuleInfo(node));
+				
+				this.currentState = "normal";
 				this.addEventListener(InvokeEvent.INVOKE, onInvoke);
 			}
 			
@@ -117,7 +141,7 @@
 
 			private function onMouseDown(event:MouseEvent):void
 			{
-				if(event.type == MouseEvent.RIGHT_MOUSE_DOWN)
+				if(event.type == MouseEvent.MOUSE_DOWN && event.controlKey)
 					this.nativeWindow.startMove();
 			}
 			
@@ -165,41 +189,76 @@
 				this.pdmlStack.addItem(new PdmlFile(dataXML.text()));
 			}
 			
-			private function hide():void
+			private function hide(event:MouseEvent = null):void
 			{
+				if(event != null && event.controlKey)
+					return;
+				
+				this.oldWidth = this.nativeWindow.width;
+				this.oldHeight = this.nativeWindow.height;
 				this.currentState = "hidden";
-				this.nativeWindow.width = 20;
-				this.dockWindowRight();
+				this.nativeWindow.width = 40;
+				this.nativeWindow.height = 20;
+				this.snapToEdge();
 			}
 			
-			private function show():void
+			private function show(event:MouseEvent = null):void
 			{
+				if(event != null && event.controlKey)
+					return;
+				
 				this.currentState = "normal";
-				this.nativeWindow.width = 300;
-				this.dockWindowRight();
+				this.nativeWindow.width = oldWidth;
+				this.nativeWindow.height = oldHeight;
+				this.ensureVisible();
+			}
+			
+			private function ensureVisible():void
+			{
+				if(this.nativeWindow.x+this.nativeWindow.width > Screen.mainScreen.visibleBounds.width)
+					this.nativeWindow.x = Screen.mainScreen.visibleBounds.width-this.nativeWindow.width;
+				if(this.nativeWindow.y+this.nativeWindow.height > Screen.mainScreen.visibleBounds.height)
+					this.nativeWindow.y = Screen.mainScreen.visibleBounds.height-this.nativeWindow.height;
 			}
 
-			private function dockWindowRight():void
+			private function snapToEdge():void
 			{
-				this.nativeWindow.x = Screen.mainScreen.visibleBounds.width-this.nativeWindow.width;
-				this.nativeWindow.y = (Screen.mainScreen.visibleBounds.height-this.nativeWindow.height)/2;
+				if(this.nativeWindow.x+this.nativeWindow.width/2 > Screen.mainScreen.visibleBounds.width/2)
+					this.nativeWindow.x = Screen.mainScreen.visibleBounds.width-this.nativeWindow.width;
+				else
+					this.nativeWindow.x = 0;
+				if(this.nativeWindow.y+this.nativeWindow.height/2 > Screen.mainScreen.visibleBounds.height/2)
+					this.nativeWindow.y = Screen.mainScreen.visibleBounds.height-this.nativeWindow.height;
+				else
+					this.nativeWindow.y = 0;
 			}
 
 		]]>
 	</fx:Script>
 	
 	<s:states>
+		<s:State name="loading" />
 		<s:State name="normal" />
 		<s:State name="hidden" />
 	</s:states>
 	
-	<s:Group width="20" height="100%" right="0" includeIn="hidden">
-		<s:Button id="showBtn" label="->" width="100%" height="100%" click="{this.show();}" />
+	<s:Rect width="100%" height="100%">
+		<s:fill>
+			<s:SolidColor color="gray" alpha="0.5" />
+		</s:fill>
+		<s:stroke>
+			<s:SolidColorStroke color="black" weight="1" />
+		</s:stroke>
+	</s:Rect>
+	
+	<s:Group width="100%" height="100%" includeIn="hidden">
+		<s:Button id="showBtn" label="+" width="100%" height="100%" click="{this.show(event);}" />
 	</s:Group>
 	
 	<s:VGroup width="100%" height="100%" includeIn="normal">
-		<s:Button id="hideBtn" label="->" width="100%" click="{this.hide()}" />
-		<pdml:PdmlStack width="100%" dataProvider="{this.pdmlStack}" height="100%"/>	
+		<pdml:PdmlStack width="100%" height="100%" dataProvider="{this.pdmlStack}" />	
+		<s:Button id="hideBtn" width="100%" label="-" click="{this.hide(event)}" />
+		<modules:ModulesPool width="100%" height="100%" modulesList="{this.modulesList}" />
 	</s:VGroup>
 	
 </s:WindowedApplication>
