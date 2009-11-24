@@ -11,7 +11,7 @@
 			import flash.display.Screen;
 			import flash.events.DataEvent;
 			
-			import haxe.org.dassista.api.rest.as3.RestService;
+			import org.dassista.api.rest.as3.RestService;
 			
 			[Bindable]
 			private var _pdmlFile:PdmlFile;
@@ -41,7 +41,8 @@
 				if(this._pdmlFileChanged)
 				{
 					var pdmlParse:RestService = new RestService();
-					pdmlParse.setValue("module", "haxe.org.dassista.tools.Parser");
+					pdmlParse.setValue("moduleName", "org.dassista.modules.Parser");
+					pdmlParse.setValue("methodName", "execute");
 					pdmlParse.setValue("target", this._pdmlFile.targetClassPath);
 					pdmlParse.load(onPdmlParseResult);
 					this._pdmlFileChanged = false;

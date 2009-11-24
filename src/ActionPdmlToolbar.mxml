@@ -32,11 +32,11 @@
 			import flash.events.KeyboardEvent;
 			import flash.events.MouseEvent;
 			
-			import haxe.org.dassista.api.rest.as3.RestService;
-			
 			import mx.collections.ArrayCollection;
 			import mx.controls.Alert;
 			import mx.managers.DragManager;
+			
+			import org.dassista.api.rest.as3.RestService;
 			
 			[Bindable]
 			private var pdmlStack:ArrayCollection;
@@ -69,8 +69,8 @@
 				this.stage.addEventListener(KeyboardEvent.KEY_DOWN, onKeyDown, true);
 				
 				var stackList:RestService = new RestService();
-				stackList.setValue("module", "haxe.org.dassista.tools.RepoInfo");
-				stackList.setValue("method", "getPdmlStackList");
+				stackList.setValue("moduleName", "org.dassista.modules.RepoInfo");
+				stackList.setValue("methodName", "getPdmlStackList");
 				stackList.load(onStackListResult);
 				cursorManager.setBusyCursor();
 			}
@@ -90,8 +90,9 @@
 				
 				// module info
 				var moduleInfoContext:RestService = new RestService();
-				moduleInfoContext.setValue("module", "haxe.org.dassista.tools.ModuleInfo");
-				moduleInfoContext.setValue("target", "haxe.org.dassista.tools");
+				moduleInfoContext.setValue("moduleName", "org.dassista.modules.ModuleInfo");
+				moduleInfoContext.setValue("methodName", "execute");
+				moduleInfoContext.setValue("target", "_app.org.dassista.tools");
 				
 				moduleInfoContext.load(onModuleInfoResult);
 			}
@@ -168,8 +169,8 @@
 			private function addPdmlFile(filePath:String):void
 			{
 				var getClassPath:RestService = new RestService();
-				getClassPath.setValue("module", "haxe.org.dassista.tools.RepoInfo");
-				getClassPath.setValue("method", "stackPdmlFile");
+				getClassPath.setValue("moduleName", "org.dassista.modules.RepoInfo");
+				getClassPath.setValue("methodName", "stackPdmlFile");
 				getClassPath.setValue("target", filePath);
 				getClassPath.load(onGetClassPathResult);
 				cursorManager.setBusyCursor();
