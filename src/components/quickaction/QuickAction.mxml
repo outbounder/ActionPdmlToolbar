@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:VGroup xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/halo">
+	<fx:Script>
+		<![CDATA[
+			import flash.events.MouseEvent;
+
+			protected function quickActionBtn_clickHandler(event:MouseEvent):void
+			{
+				var quickActionWindow:QuickActionExecuteWindow = new QuickActionExecuteWindow();
+				quickActionWindow.pdmlContent = this.pdmlContent.text;
+				quickActionWindow.open();
+				this.pdmlContent.text = "";
+			}
+
+		]]>
+	</fx:Script>
+	
+	<s:RichEditableText id="pdmlContent" width="100%" height="100%" />	
+	<s:Button id="quickActionBtn" label="quick action"  click="quickActionBtn_clickHandler(event)"/>
+</s:VGroup>

@@ -9,7 +9,7 @@
 					   preinitialize="onPreinitialize()"
 					   creationComplete="onCreationComplete()"
 					   applicationComplete="onAppComplete()"
-					   mouseDown="onMouseDown(event)" xmlns:components="components.*" xmlns:modules="components.modules.*">
+					   mouseDown="onMouseDown(event)" xmlns:components="components.*" xmlns:modules="components.modules.*" xmlns:quickaction="components.quickaction.*">
 	
 	<fx:Style>
 		
@@ -259,7 +259,8 @@
 	<s:VGroup width="100%" height="100%" includeIn="normal">
 		<pdml:PdmlStack width="100%" height="100%" dataProvider="{this.pdmlStack}" />	
 		<s:Button id="hideBtn" width="100%" label="-" click="{this.hide(event)}" />
-		<modules:ModulesPool width="100%" height="100%" modulesList="{this.modulesList}" />
+		<!--<modules:ModulesPool width="100%" height="100%" modulesList="{this.modulesList}" />-->
+		<quickaction:QuickAction width="100%" height="100%" />
 	</s:VGroup>
 	
 </s:WindowedApplication>
